@@ -24,7 +24,7 @@ class PlotMenu(object):
                           'client': [''],
                           'value_filter': ['TonerBK', 'TonerC', 'TonerM', 'TonerY', 'TonerCYM',
                                            'TonerAll', 'MonochromePages', 'ColoredPages', 'TotalPages'],
-                          'processing': ['Over Time', 'per Time Periode', 'Total']}
+                          'processing': ['instance', 'relative', 'absolute', 'ratio']}
 
         self.val_dict = {'TonerBK': ['TonerBK'],
                              'TonerAll': ['TonerBK', 'TonerC', 'TonerM', 'TonerY'],
