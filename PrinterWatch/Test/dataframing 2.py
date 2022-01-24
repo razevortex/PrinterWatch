@@ -194,4 +194,4 @@ def create_plot(value_list, client_list, plot='', val_type='', mode='', foo=''):
         fig.show()
 
 
-create_plot(value_list[0][0], all, foo='', plot='line')
+create_plot(value_list[0][1], all, foo='relative', mode='', plot='line')

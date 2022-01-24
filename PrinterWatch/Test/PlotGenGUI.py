@@ -2,12 +2,12 @@ import copy
 
 import PySimpleGUI as sg
 if __name__ == '__main__':
-    from subs.const.ConstantParameter import header as _header, ROOT, data_dict_template
-    from subs.foos import list_of_dicts_sorting as lod_sort, get_recent_data, import_ip_file
+    from Packages.subs.const.ConstantParameter import header as _header, ROOT, data_dict_template
+    from Packages.subs.foos import list_of_dicts_sorting as lod_sort, get_recent_data, import_ip_file
     from Packages.subs.csv_handles import *
 else:
-    from .subs.const.ConstantParameter import header as _header, ROOT, data_dict_template
-    from .subs.foos import list_of_dicts_sorting as lod_sort, get_recent_data, import_ip_file
+    from Packages.subs.const.ConstantParameter import header as _header, ROOT, data_dict_template
+    from Packages.subs.foos import list_of_dicts_sorting as lod_sort, get_recent_data, import_ip_file
     from Packages.subs.csv_handles import *
 import plotly.express as px
 import pandas as pd
@@ -25,7 +25,7 @@ class PlotMenu(object):
                           'client': [''],
                           'value_filter': ['TonerBK', 'TonerC', 'TonerM', 'TonerY', 'TonerCYM',
                                            'TonerAll', 'MonochromePages', 'ColoredPages', 'TotalPages'],
-                          'processing': ['instance', 'relative', 'absolute', 'ratio']}
+                          'processing': ['instance', 'relative', 'absolute', 'ratio', 'compare']}
 
         self.val_dict = {'TonerBK': ['TonerBK'],
                              'TonerAll': ['TonerBK', 'TonerC', 'TonerM', 'TonerY'],
@@ -61,51 +61,63 @@ class PlotMenu(object):
                 self.PlotWindow.close()
             return 'Close'
         if event == 'client_amount':
-            if values['client_amount'] != '' and values['client_amount'] != 'All':
-                self.PlotWindow.Element('client_filter').update(visible=True,
-                                                                values=self.selectors['client_filter'][
-                                                                    values['client_amount']])
-                self.PlotWindow.Element('client_filter_label').update(visible=True)
-            else:
+            if values['client_amount'] == '':
                 self.PlotWindow.Element('client').update(visible=False, values='')
                 self.PlotWindow.Element('client_filter').update(visible=False)
                 self.PlotWindow.Element('client_filter_label').update(visible=False)
                 self.PlotWindow.Element('available_client_label').update(visible=False)
-        if event == 'client_filter':
-            if values['client_filter'] != '':
-                    self.PlotWindow.Element('available_client').update(values=self.selection_dict[values['client_filter']],
-                                                                       visible=True)
-                    self.PlotWindow.Element('available_client_label').update(visible=True)
-            else:
-                self.PlotWindow.Element('client').update(visible=False)
-                self.PlotWindow.Element('available_client').update(visible=False)
+                self.PlotWindow.Element('plotting').update(visible=False)
+                self.PlotWindow.Element('eff_bw').update(visible=False)
+                self.PlotWindow.Element('eff_col').update(visible=False)
+            if values['client_amount'] == 'All':
+                self.PlotWindow.Element('plotting').update(visible=False)
+                self.PlotWindow.Element('eff_bw').update(visible=True)
+                self.PlotWindow.Element('eff_col').update(visible=True)
                 self.PlotWindow.Element('available_client_label').update(visible=False)
-        if event == 'available_client':
-            if values['available_client'] != '' and values['client_amount'] == 'Single':
-                self.PlotWindow.Element('client').update(values=self.get_filtered_ip_list(values['client_filter'],
-                                                                                          values['available_client']),
-                                                         visible=True)
-                self.PlotWindow.Element('client_label').update(visible=True)
-        if values['client'] != '' and values['client_amount'] == 'Single':
-            self.PlotWindow.Element('plotting').update(visible=True)
-
-        elif values['available_client'] != '' and values['client_amount'] == 'Multiple':
-            self.PlotWindow.Element('plotting').update(visible=True)
-        elif values['client_amount'] == 'All':
-            self.PlotWindow.Element('client').update(visible=False, values='')
-            self.PlotWindow.Element('client_filter').update(visible=False)
-            self.PlotWindow.Element('client_filter_label').update(visible=False)
-            self.PlotWindow.Element('available_client_label').update(visible=False)
-            self.PlotWindow.Element('plotting').update(visible=True)
-            self.PlotWindow.Element('eff_bw').update(visible=True)
-            self.PlotWindow.Element('eff_col').update(visible=True)
-        else:
-            self.PlotWindow.Element('plotting').update(visible=False)
-            self.PlotWindow.Element('eff_bw').update(visible=False)
-            self.PlotWindow.Element('eff_col').update(visible=False)
-        if values['client_filter'] != '':
+                self.PlotWindow.Element('available_client').update(visible=False)
+                self.PlotWindow.Element('client').update(visible=False, values='')
+                self.PlotWindow.Element('client_label').update(visible=False, values='')
+                self.PlotWindow.Element('client_filter').update(visible=False)
+                self.PlotWindow.Element('client_filter_label').update(visible=False)
             if values['client_amount'] == 'Groups':
+                self.PlotWindow.Element('plotting').update(visible=False)
+                self.PlotWindow.Element('available_client_label').update(visible=False)
+                self.PlotWindow.Element('available_client').update(visible=False)
+                self.PlotWindow.Element('client').update(visible=False, values='')
+                self.PlotWindow.Element('client_label').update(visible=False, values='')
+                self.PlotWindow.Element('client_filter').update(visible=True)
+                self.PlotWindow.Element('client_filter_label').update(visible=True)
+            else:
+                self.PlotWindow.Element('available_client').update(
+                    values=self.selection_dict[values['client_filter']],
+                    visible=True)
+                self.PlotWindow.Element('available_client_label').update(visible=True)
+                self.PlotWindow.Element('plotting').update(visible=False)
+                self.PlotWindow.Element('client_filter').update(visible=True)
+                self.PlotWindow.Element('client_filter_label').update(visible=True)
+        if event == 'client_filter':
+            if values['client_amount'] == 'Groups' and values['client_filter'] != '':
+                        self.PlotWindow.Element('plotting').update(visible=True)
+                        self.PlotWindow.Element('eff_bw').update(visible=True)
+                        self.PlotWindow.Element('eff_col').update(visible=True)
+            elif values['client_amount'] == 'Multiple' and values['client_filter'] != '':
+                self.PlotWindow.Element('available_client').update(visible=True)
+                self.PlotWindow.Element('available_client_label').update(visible=True)
+            elif values['client_amount'] == 'Single' and values['client_filter'] != '':
+                self.PlotWindow.Element('available_client').update(visible=True)
+                self.PlotWindow.Element('available_client_label').update(visible=True)
+        if event == 'available_client':
+            if values['client_amount'] == 'Multiple' and values['available_client'] != '':
                 self.PlotWindow.Element('plotting').update(visible=True)
+            elif values['client_amount'] == 'Single' and values['available_client'] != '':
+                self.PlotWindow.Element('client').update(
+                    values=self.get_filtered_ip_list(values['client_filter'],
+                                                     values['available_client']),
+                    visible=True)
+        if event == 'client':
+            if values['client'] != '':
+                self.PlotWindow.Element('plotting').update(visible=True)
+
         if event == 'plotting' or event == 'eff_bw' or event == 'eff_col':
             if event == 'plotting' and values['processing'] != '':
                 eff = False

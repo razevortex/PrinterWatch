@@ -17,7 +17,7 @@ header = {'request_db': ['TonerBK', 'TonerC', 'TonerM', 'TonerY',
                          'Printed_BW', 'Printed_BCYM', 'Copied_BW', 'Copied_BCYM', 'Status_Report', 'Time_Stamp',
                          'CartBK', 'CartC', 'CartM', 'CartY', 'Location', 'Contact', 'Notes'],
           'config': ['Config_ID', 'data_table_displayed', 'Sort_Key'],
-          'override': ['ID', 'Key', 'Val']
+          'override': ['ID', 'Serial_No', 'CartBK', 'CartC', 'CartM', 'CartY', 'Location', 'Contact', 'Notes']
           }
 
 # kyocera mib list index´s 0 = Max, 1 = Fill, 2 = Cart

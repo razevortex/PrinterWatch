@@ -324,13 +324,49 @@ class ConfigLib(HandleDB):
         self.updateData()
 
 
+
 class LibOverride(HandleDB):
     def __init__(self):
         csv = fr'{ROOT}\lib\override.csv'
         _for_ini = (False,
                     csv,
-                    header['config_head'],
-                    'Config_ID'
+                    header['override'],
+                    'ID'
                     )
         super().__init__(_for_ini)
         self.updateData()
+
+    def getEntry(self, key_val):
+        for row in self.ClientData:
+            if row[self.Entry_ID] == key_val:
+                temp = {}
+                print('found')
+                for k in self.Header:
+                    if row[k] != 'NaN':
+                        temp[k] = row[k]
+                print(temp)
+                return temp
+        return False
+
+    def entry_template(self):
+        t = {}
+        for key in self.Header:
+            t[key] = 'NaN'
+        return t
+
+    def addEntry(self, entry):
+        add = self.entry_template()
+        add.update(entry)
+        data = []
+        for line in self.ClientData:
+            data.append(line)
+            if line[self.Entry_ID] == add['ID']:
+                add.update(line)
+                add.update(entry)
+                line.update(add)
+                self.updateCSV()
+                print('override updated')
+                return
+        data.append(add)
+        self.ClientData = data
+        self.updateCSV()

@@ -3,11 +3,11 @@ import PySimpleGUI as sg
 if __name__ == '__main__':
     from subs.const.ConstantParameter import header as _header, ROOT, data_dict_template
     from subs.foos import list_of_dicts_sorting as lod_sort, get_recent_data, import_ip_file
-    from subs.csv_handles import ConfigLib, dbRequest, dbClientSpecs
+    from subs.csv_handles import ConfigLib, dbRequest, dbClientSpecs, LibOverride
 else:
     from .subs.const.ConstantParameter import header as _header, ROOT, data_dict_template
     from .subs.foos import list_of_dicts_sorting as lod_sort, get_recent_data, import_ip_file
-    from .subs.csv_handles import ConfigLib, dbRequest, dbClientSpecs
+    from .subs.csv_handles import ConfigLib, dbRequest, dbClientSpecs, LibOverride
     from .PlotData import *
 import datetime as dt
 
@@ -165,12 +165,17 @@ class GUI(object):
 
             event, values = self.InfoWindow.read()
 
-
             if event == 'Close' or event == sg.WIN_CLOSED:
                 self.InfoWindow.close()
                 self.InfoWindow = None
-            if event == '_add_info':
+            if event == '_add_override':
+                t_dic = {'ID': values['_target'], values['_override_key']: values['_override_val']}
+                override = LibOverride()
+                override.addEntry(t_dic)
 
+            '''
+            if event == '_add_info':
+    
                 t_dic = {'Notes': values['_note']}
                 specs = dbClientSpecs()
                 rebuild_list = []
@@ -182,7 +187,7 @@ class GUI(object):
                     rebuild_list.append(client)
                 specs.ClientData = rebuild_list
                 specs.updateCSV()
-
+            '''
 
         if self.ConfigWindow is not None:
             event, values = self.window_config_read()
@@ -389,7 +394,24 @@ class GUI(object):
                          no_titlebar=False,
                          )
 
+    def info_window_builder(self):
+        head_vals = ['Serial_No', 'IP', 'Manufacture', 'Model', 'Location']
+        string = 'Client : '
+        for key, val in self.select.items():
+            if key in head_vals:
+                string += f' | {self.select[key]}'
+        string += '|'
+        head = [[sg.Text(string, key='_client')]]
+        return sg.Window('Info', [head,  [sg.Button('Statistics', key='_plot')],
+                                  [self.layout_info_table(),
+                                   [sg.Combo(_header['override'][1::], key='_override_key'), sg.InputText(key='_override_val'),
+                                    sg.InputText(visible=False, key='_target', default_text=self.select['Serial_No']),
+                                    sg.Button('Override', key='_add_override', bind_return_key=True)]]],
 
+                         grab_anywhere=True,
+                         no_titlebar=False,
+                         )
+    '''
     def info_window_builder(self):
         head_vals = ['Serial_No', 'IP', 'Manufacture', 'Model', 'Location']
         string = 'Client : '
@@ -407,7 +429,7 @@ class GUI(object):
                          grab_anywhere=True,
                          no_titlebar=False,
                          )
-
+    '''
 # THIS IS ONLY A TEST ENV TO RUM THE GUI ON ITS OWN FOR DEBUG & DEV PURPOSES
 '''
 

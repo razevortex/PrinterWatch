@@ -52,6 +52,9 @@ def get_recent_data(temp):
             spec.updateData()
             temp = spec.getEntry('id', clients['Serial_No'])
             clients.update(temp)
+            override = LibOverride()
+            if override.getEntry(temp['Serial_No']):
+                clients.update(override.getEntry(temp['Serial_No']))
             data.append(clients)
         return data
 
