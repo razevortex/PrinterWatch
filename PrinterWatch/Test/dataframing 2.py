@@ -1,28 +1,10 @@
 import pandas as pd
 import plotly.express as px
 from Packages.subs.csv_handles import *
+from Packages.subs.const.ConstantParameter import *
 
-#   The Vars needed as input
-man_dic = {'Brother': [], 'Kyocera': []}
-client = dbClient()
-client.updateData()
-all = []
-dic = {}
-arr = []
-for line in client.ClientData:
-    all.append(line['Serial_No'])
-    man_dic[line['Manufacture']].append(line['Serial_No'])
-    arr.append(line['Model'])
-arr = list(set(arr))
-for a in arr:
-    dic[a] = []
-for line in client.ClientData:
-    dic[line['Model']].append(line['Serial_No'])
-print(dic)
 
-value_list = [[['Printed_BW', 'Copied_BW'], ['TonerBK']],
-              [['Printed_BCYM', 'Copied_BCYM'], ['TonerC', 'TonerM', 'TonerY']]]
-
+'''
 #   Foo that Handles the Collecting of the data from the csv files
 
 
@@ -78,12 +60,15 @@ def pre_processing(client, value_list, val_type='Pages', timemode='absolute', in
                         n = i
 
     t_df = pd.DataFrame(arr)
-    t_df['sum'] = t_df.sum(axis=1)
+    t_df['sum'] = t_df.sum(numeric_only=True, axis=1)
+
+
     if timemode == 'absolute':
         df = pd.DataFrame({f'{client}': t_df['sum']})
         return df
     else:
         df = pd.DataFrame({f'{client}': t_df['sum']})
+
         df['Time_Stamp'] = pd.read_csv(filepath_or_buffer=f'../db/{client}.csv',
                                        usecols=['Time_Stamp'])
 
@@ -92,6 +77,7 @@ def pre_processing(client, value_list, val_type='Pages', timemode='absolute', in
         #df['elapsed'] = df.iloc[1:, position] - df.iat[0, position]
         #print(df['elapsed'])
         df = df.set_index('Time_Stamp')
+        print(df)
         return df
 
 
@@ -110,24 +96,29 @@ def processing(value_list, client_list, plot='', val_type='', mode=''):
         else:
             plot = 'line'
             mode = 'relative'
-
+    #df = pd.DataFrame()
     df = pre_processing(client_list[0], value_list, val_type=val_type, timemode=mode)
     for cli in client_list[1::]:
         if plot == 'bar':
             df[cli] = pre_processing(cli, value_list, val_type=val_type, timemode=mode)
+            print(df[cli])
         elif plot == 'line':
             df = df.append(pre_processing(cli, value_list, val_type=val_type, timemode=mode), sort=True)
-
+            df.sort_index(inplace=True)
+            df.fillna(method='ffill', inplace=True)
+            #df.fillna(0, inplace=True)
+            df.sort_index(inplace=True)
+            print('used   ', df)
     df.sort_index(inplace=True)
     df.fillna(method='ffill', inplace=True)
-    df.fillna(0, inplace=True)
+    #df.fillna(0, inplace=True)
     df.sort_index(inplace=True)
     #print(plot, df)
     return df
 
 
-def create_plot(value_list, client_list, plot='', val_type='', mode='', foo=''):
-    '''
+def create_plot(value_list, client, plot='', val_type='', mode='', foo=''):
+    
     :param value_list: a list of the values of the csv that get collected and summed up
     :param client_list: a list of the serial_no of the printers that get included in the plot
     :param plot: 'bar' or 'line' default is line
@@ -137,21 +128,23 @@ def create_plot(value_list, client_list, plot='', val_type='', mode='', foo=''):
     :param foo:
     :return:
     '''
+'''
     if foo == 'ratio':
         if type(client_list) is dict:
             df_total = pd.DataFrame()
             for key, val in client_list.items():
                 df = 100 / processing(value_list[1], val, plot='bar') * processing(value_list[0], val, plot='bar')
-                df[key] = df.sum(axis=1)
+                print(df)
+                df[key] = df.sum(numeric_only=True, axis=1)
                 df = pd.DataFrame({f'{key}': df[key]}, index=df.index)
-
+                print(df)
                 df_total = df_total.append(df, sort=True)
                 df_total.sort_index(inplace=True)
                 df_total.fillna(method='ffill', inplace=True)
                 df_total.fillna(0, inplace=True)
                 df_total.sort_index(inplace=True)
                 df_total = df_total.tail(1)
-
+            print(df_total)
             fig = px.bar(data_frame=df_total, y=df_total.columns, barmode='group')
             fig.show()
         else:
@@ -193,5 +186,47 @@ def create_plot(value_list, client_list, plot='', val_type='', mode='', foo=''):
             fig = px.line(data_frame=df_total, x=df_total.index, y=df_total.columns)
         fig.show()
 
+'''
+import pandas as pd
+import plotly.express as px
+from Packages.subs.csv_handles import *
+from Packages.subs.const.ConstantParameter import *
 
-create_plot(value_list[0][1], all, foo='relative', mode='', plot='line')
+def plot_client_statistics(client, nill=True):
+
+    plots = pd.DataFrame()
+    for val in plot_value_lists['single_client_statistic']:
+        arr = [val, 'Time_Stamp']
+        df = pd.read_csv(filepath_or_buffer=f'../db/{client}.csv',
+                         usecols=arr, index_col='Time_Stamp')
+        val_type = 'Toner' if val.startswith('Toner') else 'Pages'
+        df = statistics_processing(df, arr, val_type=val_type, nill=nill)
+        if df is not False:
+            plots = plots.append(df, sort=True)
+            print(plots)
+    fig = px.line(data_frame=plots, x=plots.index, y=plots.columns)
+    fig.show()
+
+def statistics_processing(df, arr, val_type='', nill=False):
+    temp = {}
+    for val in arr:
+        if val != 'Time_Stamp':
+            t = list(df[val])
+            n = t[0]
+            check = list(set(t))
+            if n != 'NaN' and len(check) > nill:
+                temp[val] = [0]
+                counter = 0
+                for i in t[1::]:
+                    if val_type == 'Toner':
+                        if n > i:
+                            counter += n - i
+                        temp[val].append(counter)
+                        n = i
+                    if val_type == 'Pages':
+                        counter += i - n
+                        temp[val].append(counter)
+                        n = i
+            else:
+                return False
+    return pd.DataFrame(temp, index=df.index)

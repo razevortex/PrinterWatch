@@ -11,6 +11,48 @@ else:
     from Packages.subs.csv_handles import *
 import plotly.express as px
 import pandas as pd
+from Packages.subs.csv_handles import *
+from Packages.subs.const.ConstantParameter import *
+
+def plot_client_statistics(client, nill=True):
+
+    plots = pd.DataFrame()
+    for val in plot_value_lists['single_client_statistic']:
+        arr = [val, 'Time_Stamp']
+        df = pd.read_csv(filepath_or_buffer=f'../db/{client}.csv',
+                         usecols=arr, index_col='Time_Stamp')
+        df['Time_Stamp'].iloc[0]
+        val_type = 'Toner' if val.startswith('Toner') else 'Pages'
+        df = statistics_processing(df, arr, val_type=val_type, nill=nill)
+        if df is not False:
+            plots = plots.append(df, sort=True)
+            print(plots)
+    fig = px.line(data_frame=plots, x=plots.index, y=plots.columns)
+    fig.show()
+
+def statistics_processing(df, arr, val_type='', nill=False):
+    temp = {}
+    for val in arr:
+        if val != 'Time_Stamp':
+            t = list(df[val])
+            n = t[0]
+            check = list(set(t))
+            if n != 'NaN' and len(check) > nill:
+                temp[val] = [0]
+                counter = 0
+                for i in t[1::]:
+                    if val_type == 'Toner':
+                        if n > i:
+                            counter += n - i
+                        temp[val].append(counter)
+                        n = i
+                    if val_type == 'Pages':
+                        counter += i - n
+                        temp[val].append(counter)
+                        n = i
+            else:
+                return False
+    return pd.DataFrame(temp, index=df.index)
 
 
 class PlotMenu(object):
