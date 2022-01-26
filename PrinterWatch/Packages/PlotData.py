@@ -11,7 +11,97 @@ else:
     from Packages.subs.csv_handles import *
 import plotly.express as px
 import pandas as pd
+from PIL import Image, ImageTk
+from Packages.subs.csv_handles import *
+from Packages.subs.const.ConstantParameter import *
+import datetime as dt
+from plotly.subplots import make_subplots
+import plotly.graph_objects as go
+import os
 
+
+
+def plot_client_statistics(client, nill=True):
+    plots = pd.DataFrame()
+    for val in plot_value_lists['single_client_statistic']:
+        arr = [val, 'Time_Stamp']
+        df = pd.read_csv(filepath_or_buffer=f'{ROOT}/db/{client}.csv',
+                         usecols=arr, index_col='Time_Stamp')
+
+        val_type = 'Toner' if val.startswith('Toner') else 'Pages'
+        df = statistics_processing(df, arr, val_type=val_type, nill=nill)
+        if df is not False:
+            plots = plots.append(df, sort=True)
+    # processing data to get timeline plot and daily averages of toner consumption and pages output
+    img = []
+    fig = px.line(plots, x=plots.index, y=plots.columns, title='progressive numbers')
+    fig.write_image(fr'{ROOT}\temp\numbers_over_time.jpeg')
+    img.append(img_processing(fr'{ROOT}\temp\numbers_over_time.jpeg'))
+
+    # getting the amount of days since tracking data started so far including non work days
+    cli = dbRequest(client)
+    t0 = dt.datetime.fromisoformat(cli.ClientData[0]['Time_Stamp'])
+    days = dt.datetime.now() - t0
+    days = int(days.days)
+    # coping the timeline dataframe to process and extract data to get daily averages
+    total = copy.deepcopy(plots)
+    total.fillna(method='ffill', inplace=True)
+    # dividing the last line with the total (relative to time tracked) numbers with the amount of days
+    per_day = total.iloc[-1] / days
+    # spliting the data up in toner and page values
+    toner_vals = {'values': [], 'index': []}
+    page_vals = {'values': [], 'index': []}
+    for v in list(total.columns):
+        if 'Toner' in v:
+            toner_vals['values'].append(per_day[v])
+            toner_vals['index'].append(v)
+        else:
+            page_vals['values'].append(per_day[v])
+            page_vals['index'].append(v)
+    df = pd.DataFrame.from_dict(toner_vals)
+    df = df.set_index('index')
+    fig = px.bar(df, x=df.index, y=df['values'], title='Toner % usage per day (avg)')
+    fig.write_image(fr'{ROOT}\temp\toner_daily.jpeg')
+    img.append(img_processing(fr'{ROOT}\temp\toner_daily.jpeg'))
+    df = pd.DataFrame.from_dict(page_vals)
+    df = df.set_index('index')
+    fig = px.bar(df, x=df.index, y=df['values'], title='Pages output per day (avg)')
+    fig.write_image(fr'{ROOT}\temp\pages_daily.jpeg')
+    img.append(img_processing(fr'{ROOT}\temp\pages_daily.jpeg'))
+    return img
+
+def statistics_processing(df, arr, val_type='', nill=False):
+    temp = {}
+    for val in arr:
+        if val != 'Time_Stamp':
+            t = list(df[val])
+            n = t[0]
+            check = list(set(t))
+            if n != 'NaN' and len(check) > nill:
+                temp[val] = [0]
+                counter = 0
+                for i in t[1::]:
+                    if val_type == 'Toner':
+                        if n > i:
+                            counter += n - i
+                        temp[val].append(counter)
+                        n = i
+                    if val_type == 'Pages':
+                        counter += i - n
+                        temp[val].append(counter)
+                        n = i
+            else:
+                return False
+    return pd.DataFrame(temp, index=df.index)
+
+def img_processing(path):
+    size = (500, 500)
+    img = Image.open(path)
+    img = img.resize(size, resample=Image.BICUBIC)
+    image = ImageTk.PhotoImage(image=img)
+    return image
+
+# Start of a class for creating a GUI to create processes that build plots out of all (or multiple) data sets collected
 
 class PlotMenu(object):
     def __init__(self):

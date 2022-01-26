@@ -29,6 +29,8 @@ class GUI(object):
         self.TableColorCode = ()
         self.MainWindowPos = (0, 0)
         self.InfoWindow = None
+        self.imgs = None
+        self.img_num = 0
         self.PlotWindow = None
         self.plot = None
         self.WindowMin = False
@@ -172,23 +174,14 @@ class GUI(object):
                 t_dic = {'ID': values['_target'], values['_override_key']: values['_override_val']}
                 override = LibOverride()
                 override.addEntry(t_dic)
-
-            '''
-            if event == '_add_info':
-    
-                t_dic = {'Notes': values['_note']}
-                specs = dbClientSpecs()
-                rebuild_list = []
-                for client in specs.ClientData:
-                    print('>>', client)
-                    if client['Serial_No'] == values['_target']:
-                        client.update(t_dic)
-                        print('<<', client)
-                    rebuild_list.append(client)
-                specs.ClientData = rebuild_list
-                specs.updateCSV()
-            '''
-
+            if event == '_plot':
+                self.imgs = plot_client_statistics(values['_target'], nill=True)
+                self.img_num = 0
+                self.InfoWindow['_next_img'].update(visible=True)
+                self.InfoWindow[f'-IMAGE-'].update(data=self.imgs[self.img_num], visible=True)
+            if event == '_next_img':
+                self.img_num = self.img_num + 1 if self.img_num < 2 else 0
+                self.InfoWindow[f'-IMAGE-'].update(data=self.imgs[self.img_num])
         if self.ConfigWindow is not None:
             event, values = self.window_config_read()
             if event == 'Close' or event == sg.WIN_CLOSED:
@@ -359,7 +352,7 @@ class GUI(object):
                                       headings=head,
                                       display_row_numbers=False,
                                       auto_size_columns=True,
-                                      num_rows=min(25, len(data)))]]
+                                      num_rows=min(10, len(data)))]]
             return table_layout
         except:
             return [sg.Text('Placeholder: here goes the table as soon it has something to display')]
@@ -406,7 +399,10 @@ class GUI(object):
                                   [self.layout_info_table(),
                                    [sg.Combo(_header['override'][1::], key='_override_key'), sg.InputText(key='_override_val'),
                                     sg.InputText(visible=False, key='_target', default_text=self.select['Serial_No']),
-                                    sg.Button('Override', key='_add_override', bind_return_key=True)]]],
+                                    sg.InputText(visible=False, key='_head', default_text=string),
+                                    sg.Button('Override', key='_add_override', bind_return_key=True)]],
+                                  [sg.Image(size=(500, 500), key='-IMAGE-', visible=False)],
+                                  [sg.Button('next', key='_next_img', visible=False)]],
 
                          grab_anywhere=True,
                          no_titlebar=False,

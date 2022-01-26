@@ -110,6 +110,8 @@ ManufacturerList = ['KYOCERA', 'Brother']
 translate_Kyocera = {'Manufacture': 'Kyocera', '2.43.5.1.1.16.1': 'Model', '2.43.5.1.1.17.1': 'Serial_No'}
 translate_Brother = {'Manufacture': 'Brother', 'hrDeviceDescr.1': 'Model', '2.43.5.1.1.17.1': 'Serial_No'}
 mib_head_snmp = {'Kyocera': translate_Kyocera, 'Brother': translate_Brother}
+
+plot_value_lists = {'single_client_statistic': ['Printed_BW', 'Copied_BW', 'Printed_BCYM', 'Copied_BCYM', 'TonerBK', 'TonerC', 'TonerM', 'TonerY']}
 '''
 >> manufacture_oid, string
 if manufacturerList in string
