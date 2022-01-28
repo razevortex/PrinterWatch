@@ -70,6 +70,8 @@ class BrotherMFCDefault(object):
             dict_t = {f'Cart{tag}': f'{cart_type}{tag}'}
             if cart_type == 'TN-246' and tag == 'BK':
                 dict_t = {f'Cart{tag}': 'TN-242BK'}
+            if cart_type == 'TN-247' and tag == 'BK':
+                dict_t = {f'Cart{tag}': 'TN-241BK'}
             self._dict.update(dict_t)
         self.get_vals()
 
