@@ -178,8 +178,14 @@ class GUI(object):
                 try:
                     bw, cym, enough_data = get_cli_data(values['_target'], nill=True)
                     if enough_data:
-                        self.InfoWindow['_bw_page'].update(f'{bw} € per Monochrome Page', visible=True)
-                        self.InfoWindow['_cym_page'].update(f'{cym} € per Colored Page', visible=True)
+                        if bw is not False:
+                            self.InfoWindow['_bw_page'].update(f'{bw} € per Monochrome Page', visible=True)
+                        else:
+                            print('bw data invalid')
+                        if cym is not False:
+                            self.InfoWindow['_cym_page'].update(f'{cym} € per Colored Page', visible=True)
+                        else:
+                            print('cym data invalid')
                 except:
                     print('received some invalid data for efficience')
                 try:
@@ -405,6 +411,31 @@ class GUI(object):
                 string += f' | {self.select[key]}'
         string += '|'
         head = [[sg.Text(string, key='_client')]]
+        return sg.Window('Info', [head, [sg.Text('bypass data'),
+                                         sg.Combo(_header['override'][1::], key='_override_key'),
+                                         sg.InputText(key='_override_val'),
+                                         sg.InputText(visible=False, key='_target', default_text=self.select['Serial_No']),
+                                         sg.InputText(visible=False, key='_head', default_text=string),
+                                         sg.Button('Override', key='_add_override', bind_return_key=True)],
+                                  [self.layout_info_table()],
+                                  [sg.Button('Statistics', key='_plot')],
+                                  [sg.Image(size=(500, 500), key='-IMAGE-', visible=False),
+                                  [[sg.Text('nan', key='_bw_page', visible=False)],
+                                   [sg.Text('nan', key='_cym_page', visible=False)]]],
+                                  [sg.Button('next', key='_next_img', visible=False)]],
+
+                         grab_anywhere=True,
+                         no_titlebar=False,
+                         )
+
+'''    def info_window_builder(self):
+        head_vals = ['Serial_No', 'IP', 'Manufacture', 'Model', 'Location']
+        string = 'Client : '
+        for key, val in self.select.items():
+            if key in head_vals:
+                string += f' | {self.select[key]}'
+        string += '|'
+        head = [[sg.Text(string, key='_client')]]
         return sg.Window('Info', [head,  [sg.Button('Statistics', key='_plot')],
                                   [self.layout_info_table(),
                                    [sg.Combo(_header['override'][1::], key='_override_key'), sg.InputText(key='_override_val'),
@@ -419,25 +450,7 @@ class GUI(object):
                          grab_anywhere=True,
                          no_titlebar=False,
                          )
-    '''
-    def info_window_builder(self):
-        head_vals = ['Serial_No', 'IP', 'Manufacture', 'Model', 'Location']
-        string = 'Client : '
-        for key, val in self.select.items():
-            if key in head_vals:
-                string += f' | {self.select[key]}'
-        string += '|'
-        head = [[sg.Text(string, key='_client')]]
-        return sg.Window('Info', [head,  [sg.Button('Statistics', key='_plot')],
-                                  [self.layout_info_table(),
-                                   [sg.InputText(key='_note'),
-                                    sg.InputText(visible=False, key='_target', default_text=self.select['Serial_No']),
-                                    sg.Button('add Note', key='_add_info', bind_return_key=True)]]],
-
-                         grab_anywhere=True,
-                         no_titlebar=False,
-                         )
-    '''
+'''
 # THIS IS ONLY A TEST ENV TO RUM THE GUI ON ITS OWN FOR DEBUG & DEV PURPOSES
 '''
 

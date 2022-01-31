@@ -21,7 +21,7 @@ import os
 
 
 
-def plot_client_statistics(client, nill=True):
+def plot_client_statistics(client, in_browser= True, nill=True):
     plots = pd.DataFrame()
     for val in plot_value_lists['single_client_statistic']:
         arr = [val, 'Time_Stamp']
@@ -35,6 +35,8 @@ def plot_client_statistics(client, nill=True):
     # processing data to get timeline plot and daily averages of toner consumption and pages output
     img = []
     fig = px.line(plots, x=plots.index, y=plots.columns, title='progressive numbers')
+    if in_browser:
+        fig.show()
     fig.write_image(fr'{ROOT}\temp\numbers_over_time.jpeg')
     img.append(img_processing(fr'{ROOT}\temp\numbers_over_time.jpeg'))
 
