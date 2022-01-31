@@ -175,10 +175,20 @@ class GUI(object):
                 override = LibOverride()
                 override.addEntry(t_dic)
             if event == '_plot':
-                self.imgs = plot_client_statistics(values['_target'], nill=True)
-                self.img_num = 0
-                self.InfoWindow['_next_img'].update(visible=True)
-                self.InfoWindow[f'-IMAGE-'].update(data=self.imgs[self.img_num], visible=True)
+                try:
+                    bw, cym, enough_data = get_cli_data(values['_target'], nill=True)
+                    if enough_data:
+                        self.InfoWindow['_bw_page'].update(f'{bw} € per Monochrome Page', visible=True)
+                        self.InfoWindow['_cym_page'].update(f'{cym} € per Colored Page', visible=True)
+                except:
+                    print('received some invalid data for efficience')
+                try:
+                    self.imgs = plot_client_statistics(values['_target'], nill=True)
+                    self.img_num = 0
+                    self.InfoWindow['_next_img'].update(visible=True)
+                    self.InfoWindow[f'-IMAGE-'].update(data=self.imgs[self.img_num], visible=True)
+                except:
+                    print('something went wrong while trying to create plot')
             if event == '_next_img':
                 self.img_num = self.img_num + 1 if self.img_num < 2 else 0
                 self.InfoWindow[f'-IMAGE-'].update(data=self.imgs[self.img_num])
@@ -401,7 +411,9 @@ class GUI(object):
                                     sg.InputText(visible=False, key='_target', default_text=self.select['Serial_No']),
                                     sg.InputText(visible=False, key='_head', default_text=string),
                                     sg.Button('Override', key='_add_override', bind_return_key=True)]],
-                                  [sg.Image(size=(500, 500), key='-IMAGE-', visible=False)],
+                                  [sg.Image(size=(500, 500), key='-IMAGE-', visible=False),
+                                  [[sg.Text('nan', key='_bw_page', visible=False)],
+                                   [sg.Text('nan', key='_cym_page', visible=False)]]],
                                   [sg.Button('next', key='_next_img', visible=False)]],
 
                          grab_anywhere=True,

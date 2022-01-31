@@ -481,6 +481,87 @@ class PlotMenu(object):
             dict_t[key].sort()
         return dict_t
 
+def statistics_processing_eff(df, arr, val_type='', nill=False):
+    temp = {}
+    for val in arr:
+        if val != 'Time_Stamp':
+            t = list(df[val])
+            n = t[0]
+            check = list(set(t))
+            if isinstance(n, int) and len(check) > nill:
+                temp[val] = [0]
+                counter = 0
+                for i in t[1::]:
+                    if val_type == 'Toner':
+                        if n > i:
+                            counter += n - i
+                        temp[val].append(counter)
+                        n = i
+                    if val_type == 'Pages':
+                        counter += i - n
+                        temp[val].append(counter)
+                        n = i
+            else:
+                return False
+    return counter
+
+def get_cli_data(client_id, nill=True):
+    plots = {}
+    for val in plot_value_lists['single_client_statistic']:
+        plots[val] = 0
+        arr = [val, 'Time_Stamp']
+        df = pd.read_csv(filepath_or_buffer=f'{ROOT}/db/{client_id}.csv',
+                             usecols=arr, index_col='Time_Stamp')
+        val_type = 'Toner' if val.startswith('Toner') else 'Pages'
+        df = statistics_processing_eff(df, arr, val_type=val_type, nill=nill)
+        if df is not False and df != 'nan':
+            plots[val] += df
+        else:
+            plots[val] = 0
+            continue
+    plots['Pages_BW'] = plots['Printed_BW'] + plots['Copied_BW']
+    plots['Pages_BCYM'] = plots['Printed_BCYM'] + plots['Copied_BCYM']
+    plots['Pages_Total'] = plots['Pages_BW'] + plots['Pages_BCYM']
+    plots['Toner_CYM'] = plots['TonerC'] + plots['TonerM'] + plots['TonerY']
+    plots['Toner_Total'] = plots['Toner_CYM'] + plots['TonerBK']
+    if plots['TonerBK'] > 0:
+        BK = int(100 / plots['TonerBK'] * plots['Pages_Total'])
+    else:
+        BK = False
+    if plots['Toner_CYM'] > 0:
+        CYM = int(100 / plots['Toner_CYM'] * plots['Pages_BCYM'])
+    else:
+        CYM = False
+    if plots['Pages_Total'] > 100:
+        cost_dic = client_cart_prices(client_id)
+        if BK is not False:
+            BK = cost_dic['BK'] / BK
+            BK = str(BK)
+            BK = BK[0:5]
+        if CYM is not False:
+            CYM = cost_dic['CYM'] / CYM
+            CYM = str(CYM)
+            CYM = CYM[0:5]
+        return BK, CYM, True
+    else:
+        return BK, CYM, False
+
+def client_cart_prices(client_id):
+    db_spec = dbClientSpecs()
+    temp = {}
+    for line in db_spec.ClientData:
+        if line['Serial_No'] == client_id:
+            carts = ['CartBK', 'CartC', 'CartM', 'CartY']
+            for cart in carts:
+                if line[cart] != 'NaN':
+                    string = cart.replace('Cart', '')
+                    temp[string] = TONER_COST_DICT[line[cart]][1]
+    try:
+        dic = {'BK': temp['BK'], 'CYM': float(temp['C'] + temp['M'] + temp['Y'])}
+        return dic
+    except:
+        return temp
+
 if __name__ == '__main__':
     plotter = PlotMenu()
     start = True
