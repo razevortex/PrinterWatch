@@ -174,7 +174,7 @@ class GUI(object):
                 t_dic = {'ID': values['_target'], values['_override_key']: values['_override_val']}
                 override = LibOverride()
                 override.addEntry(t_dic)
-            if event == '_plot':
+            if event == '_plot' or event == '_plot+':
                 try:
                     bw, cym, enough_data = get_cli_data(values['_target'], nill=True)
                     if enough_data:
@@ -189,7 +189,10 @@ class GUI(object):
                 except:
                     print('received some invalid data for efficience')
                 try:
-                    self.imgs = plot_client_statistics(values['_target'], nill=True)
+                    if event == '_plot':
+                        self.imgs = plot_client_statistics(values['_target'],in_browser=False, nill=True)
+                    elif event == '_plot+':
+                        self.imgs = plot_client_statistics(values['_target'], in_browser=True, nill=True)
                     self.img_num = 0
                     self.InfoWindow['_next_img'].update(visible=True)
                     self.InfoWindow[f'-IMAGE-'].update(data=self.imgs[self.img_num], visible=True)
@@ -418,7 +421,7 @@ class GUI(object):
                                          sg.InputText(visible=False, key='_head', default_text=string),
                                          sg.Button('Override', key='_add_override', bind_return_key=True)],
                                   [self.layout_info_table()],
-                                  [sg.Button('Statistics', key='_plot')],
+                                  [sg.Button('Statistics', key='_plot'), sg.Button('in Browser', key='_plot+')],
                                   [sg.Image(size=(500, 500), key='-IMAGE-', visible=False),
                                   [[sg.Text('nan', key='_bw_page', visible=False)],
                                    [sg.Text('nan', key='_cym_page', visible=False)]]],

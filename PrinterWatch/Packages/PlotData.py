@@ -21,7 +21,7 @@ import os
 
 
 
-def plot_client_statistics(client, in_browser= True, nill=True):
+def plot_client_statistics(client, in_browser=True, nill=True):
     plots = pd.DataFrame()
     for val in plot_value_lists['single_client_statistic']:
         arr = [val, 'Time_Stamp']
@@ -35,11 +35,11 @@ def plot_client_statistics(client, in_browser= True, nill=True):
     # processing data to get timeline plot and daily averages of toner consumption and pages output
     img = []
     fig = px.line(plots, x=plots.index, y=plots.columns, title='progressive numbers')
-    if in_browser:
+    # if key var in browser is true it will open the timeline plot in browser too
+    if in_browser is not False:
         fig.show()
     fig.write_image(fr'{ROOT}\temp\numbers_over_time.jpeg')
     img.append(img_processing(fr'{ROOT}\temp\numbers_over_time.jpeg'))
-
     # getting the amount of days since tracking data started so far including non work days
     cli = dbRequest(client)
     t0 = dt.datetime.fromisoformat(cli.ClientData[0]['Time_Stamp'])
