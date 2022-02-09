@@ -370,3 +370,38 @@ class LibOverride(HandleDB):
         data.append(add)
         self.ClientData = data
         self.updateCSV()
+
+class dbStats(HandleDB):
+    def __init__(self):
+        csv = fr'{ROOT}\db\client_statistics.csv'
+        _for_ini = (False,
+                    csv,
+                    header['statistics'],
+                    'Serial_No'
+                   )
+        super().__init__(_for_ini)
+        if self.create_file():
+            self.updateData()
+
+    def entry_template(self):
+        t = {}
+        for key in self.Header:
+            t[key] = 'NaN'
+        return t
+
+    def addEntry(self, entry):
+        add = self.entry_template()
+        add.update(entry)
+        data = []
+        for line in self.ClientData:
+            data.append(line)
+            if line[self.Entry_ID] == add[self.Entry_ID]:
+                add.update(line)
+                add.update(entry)
+                line.update(add)
+                self.updateCSV()
+                print('override updated')
+                return
+        data.append(add)
+        self.ClientData = data
+        self.updateCSV()

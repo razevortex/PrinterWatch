@@ -64,7 +64,6 @@ def main():
 
         if pending != []:
             gui_handle.RunState = 'busy'
-
             pending, progress, last = add_ip(pending, ClientGet)
             print(f'{progress} ip´s pending to get added')
             print(f'added {last[0]} = {last[1]}')

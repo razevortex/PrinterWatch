@@ -342,25 +342,6 @@ class PlotMenu(object):
         if eff != 'eff_bw' and eff != 'eff_col':
             return temp
         else:
-            '''client = dbClient()
-               client.updateData()
-               calc_eff = {}
-               calc_val = [0, 0]
-               for line in client.ClientData:
-                   for t_key, t_val in temp.items():
-                       calc_val = [0, 0]
-                       if t_key.startswith(line['Serial_No']):
-                           if 'Toner' in t_key:
-                               calc_val[0] = t_val
-                           if 'Pages' in t_key:
-                               calc_val[1] = t_val
-                   if calc_val[0] != 0 and calc_val[1] != 0:
-                       t = int((100 / calc_val[0]) * calc_val[1])
-                       calc_eff[line['Serial_No']] = t
-               calc_eff['Time_Stamp'] = data['Time_Stamp']
-               return calc_eff
-               '''
-
             t = []
             for key in temp.keys():
                 if 'Toner' in key:
@@ -507,7 +488,7 @@ def statistics_processing_eff(df, arr, val_type='', nill=False):
                 return False
     return counter
 
-def get_cli_data(client_id, nill=True):
+def get_cli_data(client_id, nill=True, global_stats=False):
     plots = {}
     for val in plot_value_lists['single_client_statistic']:
         plots[val] = 0
@@ -535,17 +516,29 @@ def get_cli_data(client_id, nill=True):
     else:
         CYM = False
     if plots['Pages_Total'] > 100:
-        cost_dic = client_cart_prices(client_id)
-        if BK is not False:
-            BK = cost_dic['BK'] / BK
-            BK = str(BK)
-            BK = BK[0:5]
-        if CYM is not False:
-            CYM = cost_dic['CYM'] / CYM
-            CYM = str(CYM)
-            CYM = CYM[0:5]
-        return BK, CYM, True
+        if global_stats:
+            pages = [BK, CYM]
+
+        try:
+            cost_dic = client_cart_prices(client_id)
+            if BK is not False:
+                BK = cost_dic['BK'] / BK
+                BK = str(BK)
+                BK = BK[0:5]
+            if CYM is not False:
+                CYM = cost_dic['CYM'] / CYM
+                CYM = str(CYM)
+                CYM = CYM[0:5]
+            if global_stats is not False:
+                return BK, CYM, pages, True
+            return BK, CYM, True
+        except:
+            if global_stats is not False:
+                return False, False, (0, 0), False
+            return False, False, False
     else:
+        if global_stats is not False:
+            return BK, CYM, (0, 0), False
         return BK, CYM, False
 
 def client_cart_prices(client_id):
@@ -565,9 +558,72 @@ def client_cart_prices(client_id):
         return temp
 
 if __name__ == '__main__':
-    plotter = PlotMenu()
-    start = True
-    while start:
-        exit = plotter.run(None, None)
-        if exit == 'Close':
-            start = False
+    global_statistic = ['']
+    global_total = [0, 0]
+    cli = dbClient()
+    cli.updateData()
+    arr = []
+    dic_t = {}
+    for line in cli.ClientData:
+        arr.append(line['Model'])
+    arr = list(set(arr))
+    print(arr)
+    for model in arr:
+        t = []
+        for line in cli.ClientData:
+            if line['Model'] == model:
+                t.append(line['Serial_No'])
+        dic_t[model] = t
+    print(dic_t)
+    for key in list(dic_t.keys()):
+        bk_arr = []
+        cym_arr = []
+        total_pages_cost = [0, 0]
+        for client in dic_t[key]:
+            total_pages = [0, 0]
+            total_pages_cost = [0, 0]
+            bk, cym, pages, enough_data = get_cli_data(client, global_stats=True, nill=True)
+            total_pages[0] += pages[0]
+            total_pages[1] += pages[1]
+            if enough_data:
+                if bk is not False:
+                    bk_arr.append(float(bk))
+                if cym is not False:
+                    cym_arr.append(float(cym))
+        if bk_arr != []:
+            a = sum(bk_arr) / len(bk_arr)
+            total_pages_cost[0] = a * total_pages[0]
+            a = str(a)
+            a = a[0:5]
+        else:
+            a = 'invalid'
+        if cym_arr != []:
+            b = sum(cym_arr) / len(cym_arr)
+            total_pages_cost[1] = b * total_pages[1]
+            b = str(b)
+            b = b[0:5]
+        else:
+            b = 'invalid'
+        cost_per_page = (a, b)
+        global_statistic.append(f'{key} :\n')
+        global_statistic.append(bk_arr)
+        global_statistic.append(f'\nbk (avg.of:{len(bk_arr)}) = {cost_per_page[0]} € \n')
+        global_statistic.append(f'pages : {total_pages[0]} for {total_pages_cost[0]} €\n')
+        global_statistic.append(cym_arr)
+        global_statistic.append(f'\ncym (avg.of:{len(cym_arr)}) = {cost_per_page[1]} €\n')
+        global_statistic.append(f'pages : {total_pages[1]} for {total_pages_cost[1]} €\n')
+        global_statistic.append('\n \n')
+        print(f'{key} :')
+        print(bk_arr)
+        print(f'bk (avg.of:{len(bk_arr)}) = {cost_per_page[0]} €')
+        print(f'pages : {total_pages[0]} for {total_pages_cost[0]} €')
+        print(cym_arr)
+        print(f'cym (avg.of:{len(cym_arr)}) = {cost_per_page[1]} €')
+        print(f'pages : {total_pages[1]} for {total_pages_cost[1]} €')
+        global_total[0] += total_pages[0] + total_pages[1]
+        global_total[1] += total_pages_cost[0] + total_pages_cost[1]
+        print('')
+    global_statistic.append(f'total_pages : {global_total[0]} for total : {global_total[1]} €')
+    f = open("global_statistics.txt", "w+")
+    for line in range(len(global_statistic)):
+        f.write(str(global_statistic[line]))

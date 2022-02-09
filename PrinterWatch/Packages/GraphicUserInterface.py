@@ -124,9 +124,9 @@ class GUI(object):
                 self.ConfigWindow.close()
             return '_Exit'
 
-        if event == '-State-':
-            self.RunState = True if self.RunState is not True else False
-            self.Pipe2Main = (event, self.RunState)
+        #if event == '-State-':
+        #    self.RunState = True if self.RunState is not True else False
+        #    self.Pipe2Main = (event, self.RunState)
 
 
         if event == '-Toolbar-':
@@ -281,7 +281,7 @@ class GUI(object):
             sg.Column([[sg.In(right_click_menu=self.right_click_menu, visible=False)],
                        [sg.ButtonMenu('Menu', self.right_click_menu, key='-Toolbar-')]],
                       justification='top', pad=(0, 0)),
-            sg.Column([button], justification='top', pad=(0, 0)),
+            sg.Column([button], justification='top', pad=(0, 0), visible=False),
             sg.Column([[sg.Button(button_text=self.clock, key='_clock')]],
                       justification='top', pad=(0, 0)),
             sg.Column([[sg.Button(button_text='ain´t I pretty?',
