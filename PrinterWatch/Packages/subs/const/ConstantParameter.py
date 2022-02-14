@@ -19,9 +19,24 @@ header = {'request_db': ['TonerBK', 'TonerC', 'TonerM', 'TonerY',
           'config': ['Config_ID', 'data_table_displayed', 'Sort_Key'],
           'override': ['ID', 'Serial_No', 'CartBK', 'CartC', 'CartM', 'CartY', 'Location', 'Contact', 'Notes'],
           'statistics': ['Serial_No', 'IP', 'Manufacture', 'Model', 'CostBK', 'CostCYM', 'UsedBK', 'UsedCYM',
-                       'PagesBK', 'PagesCYM', 'PagesPerBK', 'PagesPerCYM', 'DaysTotal',
-                       'UsedBK_daily', 'UsedCYM_daily', 'PagesBK_daily', 'PagesCYM_daily']
+                         'PagesBK', 'PagesCYM', 'PagesPerBK', 'PagesPerCYM', 'DaysTotal',
+                         'UsedBK_daily', 'UsedCYM_daily', 'PagesBK_daily', 'PagesCYM_daily', 'CostPerBK', 'CostPerCYM'],
+          'ext': ['CostBK', 'CostCYM', 'UsedBK', 'UsedCYM',
+                         'PagesBK', 'PagesCYM', 'PagesPerBK', 'PagesPerCYM', 'DaysTotal',
+                         'UsedBK_daily', 'UsedCYM_daily', 'PagesBK_daily', 'PagesCYM_daily', 'CostPerBK', 'CostPerCYM']
           }
+
+statistics_key_type = {'Serial_No': 'string', 'IP': 'string', 'Manufacture': 'string', 'Model': 'string',
+                       'CostBK': 'float', 'CostCYM': 'float',
+                       'UsedBK': 'int', 'UsedCYM': 'int', 'PagesBK': 'int', 'PagesCYM': 'int', 'PagesPerBK': 'float',
+                       'PagesPerCYM': 'float', 'DaysTotal': 'int', 'UsedBK_daily': 'float', 'UsedCYM_daily': 'float',
+                       'PagesBK_daily': 'float', 'PagesCYM_daily': 'float', 'CostPerBK': 'float', 'CostPerCYM': 'float'}
+
+statistics_grouping_vals = ['PagesPerBK', 'PagesPerCYM', 'UsedBK_daily', 'UsedCYM_daily',
+                              'PagesBK_daily', 'PagesCYM_daily', 'CostPerBK', 'CostPerCYM']
+
+statistics_grouping_dict = {'PagesPerBK': [], 'PagesPerCYM': [], 'UsedBK_daily': [], 'UsedCYM_daily': [],
+                            'PagesBK_daily': [], 'PagesCYM_daily': [], 'CostPerBK': [], 'CostPerCYM': []}
 
 # kyocera mib list index´s 0 = Max, 1 = Fill, 2 = Cart
 kyocera_color_toner_mib = [{'TonerC': 'mib-2.43.11.1.1.8.1.1', 'TonerM': 'mib-2.43.11.1.1.8.1.2',
@@ -157,7 +172,8 @@ TONER_COST_DICT = {'TN-2000': ('57,61 €', 57.61), 'TN-3030': ('59,78 €', 59.
                    'TK-6115': ('81,89 €', 81.89), 'TK-5240K': ('50,52 €', 50.52), 'TK-5240C': ('73,17 €', 73.17),
                    'TK-5240M': ('73,57 €', 73.57), 'TK-5240Y': ('72,11 €', 72.11), 'TK-5280K': ('135,46 €', 135.46),
                    'TK-5280C': ('173,17 €', 173.17), 'TK-5280M': ('171,46 €', 171.46), 'TK-5280Y': ('174,06 €', 174.06),
-                   'TK-5280CS': ('173,17 €', 173.17), 'TK-5280MS': ('171,46 €', 171.46), 'TK-5280YS': ('174,06 €', 174.06),
+                   'TK-5280CS': ('173,17 €', 173.17), 'TK-5280MS': ('171,46 €', 171.46),
+                   'TK-5280YS': ('174,06 €', 174.06),
                    'TK-5140K': ('83,84 €', 83.84), 'TK-5140C': ('95,32 €', 95.32), 'TK-5140M': ('95,81 €', 95.81),
                    'TK-5140Y': ('95,06 €', 95.06), 'TK-8115K': ('62,53 €', 62.53), 'TK-8115C': ('57,76 €', 57.76),
                    'TK-8115M': ('57,31 €', 57.31), 'TK-8115Y': ('57,66 €', 57.66), 'TK-3160': ('81,10 €', 81.1),

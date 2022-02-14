@@ -2,10 +2,13 @@ import copy
 import csv
 import datetime as dt
 import os
+import pandas as pd
 if __name__ == '__main__':
     from const.ConstantParameter import *
+
 else:
     from .const.ConstantParameter import *
+
 
 
 class HandleDB(object):
@@ -72,6 +75,7 @@ class HandleDB(object):
             writeing = csv.DictWriter(client_csv, fieldnames=self.Header)
             writeing.writeheader()
             writeing.writerows(self.ClientData)
+            print('updated CSV')
 
     def getEntry(self, *args):
         mode, key_val = args
@@ -382,6 +386,7 @@ class dbStats(HandleDB):
         super().__init__(_for_ini)
         if self.create_file():
             self.updateData()
+        self.updateData()
 
     def entry_template(self):
         t = {}
@@ -392,6 +397,7 @@ class dbStats(HandleDB):
     def addEntry(self, entry):
         add = self.entry_template()
         add.update(entry)
+        print(add)
         data = []
         for line in self.ClientData:
             data.append(line)
@@ -400,8 +406,10 @@ class dbStats(HandleDB):
                 add.update(entry)
                 line.update(add)
                 self.updateCSV()
-                print('override updated')
+                print('data updated')
                 return
         data.append(add)
         self.ClientData = data
         self.updateCSV()
+        print('data updated')
+

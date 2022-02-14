@@ -3,8 +3,10 @@ from Packages.RequestHandle import *
 from Packages.QueHandle import *
 from Packages.subs.foos import running, get_recent_data, data_dict_to_store, add_ip, run_background_requests, check_on_requests
 from Packages.subs.const.ConstantParameter import data_dict_template
+from Packages.createXLSX import *
 import copy
 import time
+import pandas as pd
 import subprocess as sp
 from subprocess import Popen
 
@@ -30,6 +32,7 @@ def main():
         if time.time() - last_update > 300:
             last_update = time.time()
             gui_handle.update_GUI(False)
+            export_data_to_excel()
             print(last_update)
         gui_handle.get_event()
         pipe = gui_handle.Pipe2Main

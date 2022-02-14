@@ -24,7 +24,21 @@
             </Attribute>
           </value>
         </entry>
+        <entry key="\db\client_statistics.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
         <entry key="\db\clients.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
+        <entry key="\excel_sheets\recent_stats.csv">
           <value>
             <Attribute>
               <option name="separator" value="," />
