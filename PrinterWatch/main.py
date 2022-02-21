@@ -12,6 +12,7 @@ from subprocess import Popen
 
 ###         Main Foo
 
+
 def main():
     pending = []
     gui_handle = GUI()
@@ -21,7 +22,6 @@ def main():
     last_update = time.time()
 
     while running(True):
-
         if request_active == False:
              request_active = Popen(["python", "Background_Request.py"], creationflags=sp.CREATE_NEW_CONSOLE)
         else:
@@ -29,10 +29,13 @@ def main():
                 print(request_active.poll())
                 request_active = False
 
-        if time.time() - last_update > 300:
+        if time.time() - last_update > 60:
             last_update = time.time()
             gui_handle.update_GUI(False)
-            export_data_to_excel()
+            try:
+                export_data_to_excel()
+            except:
+                print('updateing excel was not possible')
             print(last_update)
         gui_handle.get_event()
         pipe = gui_handle.Pipe2Main
@@ -71,5 +74,7 @@ def main():
             print(f'{progress} ip´s pending to get added')
             print(f'added {last[0]} = {last[1]}')
 
+
 if __name__ == '__main__':
+    export_data_to_excel()
     main()

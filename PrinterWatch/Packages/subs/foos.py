@@ -36,7 +36,6 @@ def get_filter():
 
 
 def get_recent_data(temp):
-    temp = ''
     clients = dbClient()
     client_list_of_dicts = []
     # checking if there are already stored data or is it maybe the first run this might get obsolete when a
