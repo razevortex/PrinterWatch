@@ -413,3 +413,15 @@ class dbStats(HandleDB):
         self.updateCSV()
         print('data updated')
 
+class dbStatsGroup(HandleDB):
+    def __init__(self):
+        csv = fr'{ROOT}\excel_sheets\recent_model_stats.csv'
+        _for_ini = (False,
+                    csv,
+                    header['statistics_group'],
+                    'Serial_No'
+                   )
+        super().__init__(_for_ini)
+        if self.create_file():
+            self.updateData()
+        self.updateData()
