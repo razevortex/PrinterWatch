@@ -171,6 +171,15 @@ def data_dict_to_store(data_dict):
     db.addingEntry(specs)
     return True
 
+def float_depth(float_num, depth=3):
+    try:
+        string = str(float_num)
+        string += '00000'
+        point = string.index('.') + depth
+        string = string[0:point]
+        return float(string)
+    except:
+        return float_num
 
 def read_snmp_response(file):
     with open(file) as infile:

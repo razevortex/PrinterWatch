@@ -1,4 +1,4 @@
-from Packages.subs.const.ConstantParameter import TONER_COST_DICT, header, statistics_key_type, statistics_grouping_vals, statistics_grouping_dict, ROOT, data_dict_template
+from Packages.subs.const.ConstantParameter import TONER_COST_DICT, header, statistics_key_type, statistics_grouping_vals, statistics_grouping_dict, statistics_variable_grouping_method, ROOT, data_dict_template
 import datetime as dt
 from Packages.subs.csv_handles import *
 from Packages.subs.foos import *
