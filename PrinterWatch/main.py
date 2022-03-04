@@ -29,7 +29,7 @@ def main():
                 print(request_active.poll())
                 request_active = False
 
-        if time.time() - last_update > 60:
+        if time.time() - last_update > 600:
             last_update = time.time()
             gui_handle.update_GUI(False)
             try:

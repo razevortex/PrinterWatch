@@ -98,7 +98,7 @@ def check_on_requests(request_active):
         return request_active
     else:
         if request_active.poll():
-            print(request_active.poll())
+            #print(request_active.poll())
             request_active = False
             return request_active
 
@@ -150,27 +150,36 @@ def data_dict_to_store(data_dict):
     client = {}
     request = {}
     specs = {}
-    print(f'Client S.n.:{data_dict["Serial_No"]} IP:{data_dict["Serial_No"]} . . . ')
+    #print(f'Client S.n.:{data_dict["Serial_No"]} IP:{data_dict["Serial_No"]} . . . ')
     for key, var in data_dict.items():
         if var is None or var == '' or var is False:
             data_dict[key] = 'NaN'
     for key in header['client_db']:
         client[key] = data_dict[key]
-    print(f'data for client.csv: {client}')
+    #print(f'data for client.csv: {client}')
     db = dbClient()
     db.addingEntry(client)
     for key in header['request_db']:
         request[key] = data_dict[key]
-    print(f'data for its {data_dict["Serial_No"]}.csv: {request}')
+    #print(f'data for its {data_dict["Serial_No"]}.csv: {request}')
     db = dbRequest(data_dict['Serial_No'])
     db.addingEntry(request)
     for key in header['client_specs']:
         specs[key] = data_dict[key]
-    print(f'data for client_specs.csv: {specs}')
+    #print(f'data for client_specs.csv: {specs}')
     db = dbClientSpecs()
     db.addingEntry(specs)
     return True
 
+def float_depth(float_num, depth=3):
+    try:
+        string = str(float_num)
+        string += '00000'
+        point = string.index('.') + depth
+        string = string[0:point]
+        return float(string)
+    except:
+        return float_num
 
 def read_snmp_response(file):
     with open(file) as infile:

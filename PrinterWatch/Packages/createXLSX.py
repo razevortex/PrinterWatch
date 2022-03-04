@@ -1,4 +1,4 @@
-from Packages.subs.const.ConstantParameter import TONER_COST_DICT, header, statistics_key_type, statistics_grouping_vals, statistics_grouping_dict, ROOT
+from Packages.subs.const.ConstantParameter import TONER_COST_DICT, header, statistics_key_type, statistics_grouping_vals, statistics_grouping_dict, statistics_variable_grouping_method, ROOT, data_dict_template
 import datetime as dt
 from Packages.subs.csv_handles import *
 from Packages.subs.foos import *
@@ -245,5 +245,57 @@ class dbExcel(object):
 
 
 def export_data_to_excel():
+    create_stat_model_groups()
     xlsx = dbExcel()
     xlsx.update_excel()
+
+
+def create_stat_model_groups():
+    stats = dbStats()
+    arr = []
+    models = []
+    for line in stats.ClientData:
+        if line['Model'] not in models:
+            models.append(line['Model'])
+    for model in models:
+
+        data_set = []
+        for line in stats.ClientData:
+            if line['Model'] == model:
+                data_set.append(line)
+        t_dic = {'Model': model, 'num': len(data_set)}
+        for key in statistics_variable_grouping_method.keys():
+            for value in statistics_variable_grouping_method[key]:
+                try:
+                    t_dic[value] = model_group_method(data_set, key, value)
+                except:
+                    t_dic[value] = 'invalid'
+        arr.append(t_dic)
+    model_to_datasheet(arr)
+
+
+def model_group_method(data_set, method, value):
+    temp = []
+    for line in data_set:
+        if line[value] != 'NaN':
+            temp.append(float(line[value]))
+    if method == 'sum_val':
+        return float_depth(sum(temp), depth=4)
+    elif method == 'single_val':
+        return temp[0]
+    elif method == 'average_val':
+        return float_depth(sum(temp) / len(temp), depth=4)
+
+
+def model_to_datasheet(arr):
+    csv_file = fr'{ROOT}\excel_sheets\recent_model_stats.csv'
+    excel_file = fr'{ROOT}\excel_sheets\recent_model_stats.xlsx'
+    stat_group = dbStatsGroup()
+    stat_group.ClientData = arr
+    stat_group.updateCSV()
+    file = pd.read_csv(csv_file, encoding='unicode_escape')
+    file.to_excel(excel_file, index=None, header=True)
+
+
+if __name__ == '__main__':
+    arr = create_stat_model_groups()
