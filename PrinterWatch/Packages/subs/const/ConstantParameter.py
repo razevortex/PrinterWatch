@@ -246,6 +246,10 @@ statistics_variable_grouping_method = {'single_val': ['CostBK', 'CostCYM'],
                                        'sum_val': ['UsedBK', 'UsedCYM', 'PagesBK', 'PagesCYM', 'UsedBK_daily', 'UsedCYM_daily'],
                                        'average_val': ['PagesBK_daily',	'PagesCYM_daily', 'CostPerBK',
                                                        'CostPerCYM', 'PagesPerBK', 'PagesPerCYM']}
+
+
+run_interval = 5
+
 #statistics_variable_translate = {'CostBK': ['Cost of Cartridge (B)', '€'], 'CostCYM': ['Cost of Cartridge (C/Y/M)', '€'],
 #                                 'UsedBK': ['Toner % used (B)', '%'], 'UsedCYM': ['Toner % used (C/Y/M)', '%'],
 

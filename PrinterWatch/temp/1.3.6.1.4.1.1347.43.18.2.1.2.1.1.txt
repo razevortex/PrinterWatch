@@ -1,1 +1,1 @@
-SNMPv2-SMI::enterprises.1347.43.18.2.1.2.1.1 = STRING: "Sleeping                        "
+SNMPv2-SMI::enterprises.1347.43.18.2.1.2.1.1 = STRING: "Ruhemodus"

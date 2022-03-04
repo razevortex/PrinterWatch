@@ -52,10 +52,14 @@ class HandleDB(object):
         self.ClientPack = (self.Header, self.ClientData)
 
     def cleanCSV(self):
+        # this method keeps the db clean and will remove evantualy included duplicates and other unwanted lines
+        # the first part here looks for duplicates
         with open(self.CSV, 'r', newline='') as client_csv:
             reading = csv.DictReader(client_csv, fieldnames=self.Header)
             t_arr = []
-            last_row = []
+            last_row = {}
+            for key in self.Header:
+                last_row[key] = 'NaN'
             for row in reading:
                 t_dic = {}
                 if row != last_row:
@@ -65,6 +69,23 @@ class HandleDB(object):
                     if len(t_dic) == len(self.Header):
                         t_arr.append(t_dic)
                 last_row = row
+            # here its looking for lines where NaN values sliped in on values that are useualy trackable
+            tt_arr = t_arr
+            for col in self.Header:
+                t_arr = tt_arr
+                tt_arr = []
+                val = 0
+                firstline = t_arr[0]
+                if firstline[col] == 'NaN':
+                    val = 'NaN'
+                for row in t_arr:
+                    if row[col] == 'NaN':
+                        if row[col] == val:
+                            tt_arr.append(row)
+                    else:
+                        tt_arr.append(row)
+            t_arr = tt_arr
+        # this part rewrites the cleaned csv
         with open(self.CSV, 'w', newline='') as client_csv:
             writeing = csv.DictWriter(client_csv, fieldnames=self.Header)
             writeing.writeheader()
@@ -146,6 +167,7 @@ class dbRequest(HandleDB):
                     'Time_Stamp'
                     )
         super().__init__(_for_ini)
+        self.cleanCSV()
         self.updateData()
     # the get entry method of this handle only needs one arg the time_stamp it should search for alternative
     # 'recent' can be passed to just get the last entry
